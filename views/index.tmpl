@@ -1,0 +1,19 @@
+{{define "main"}}
+<html>
+<head>
+	<title>KarAssist</title>
+</head>
+<body style="padding: 30px 10px 10px 10px;">
+	<div style="position: fixed; left: 0; top: 0; padding: 10px 15px; background: #fff; width: 100%;">
+		<form method="get" style="margin: 0; padding: 0;">
+			<input name="search" type="text" value="{{.Search}}" autofocus="autofocus" />
+			<input type="submit" value="Search" />
+		</form>
+	</div>
+
+	{{range .Songs}}
+		{{.}}<br />
+	{{end}}
+</body>
+</html>
+{{end}}
