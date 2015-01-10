@@ -38,6 +38,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", indexHandler)
 	mux.HandleFunc("/queue", queueHandler)
+	mux.HandleFunc("/unqueue", unqueueHandler)
 	log.Printf("Server started on port [%s]\n", *port)
 	log.Fatalf("Unable to start server: %s\n", http.ListenAndServe(":"+*port, mux))
 }
@@ -74,6 +75,19 @@ func queueHandler(w http.ResponseWriter, r *http.Request) {
 	queue = append(queue, id)
 	mutex.Unlock()
 	http.Redirect(w, r, "/?queued="+id, http.StatusFound)
+}
+
+func unqueueHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	for i := range queue {
+		if queue[i] == id {
+			mutex.Lock()
+			queue = append(queue[:i], queue[i+1:]...)
+			mutex.Unlock()
+			break
+		}
+	}
+	http.Redirect(w, r, "/?unqueued="+id, http.StatusFound)
 }
 
 func CaseInsensitiveContains(s, substr string) bool {
