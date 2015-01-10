@@ -2,18 +2,98 @@
 <html>
 <head>
 	<title>KarAssist</title>
+
+	<style type="text/css">
+		body { padding: 30px 10px 10px 10px; font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; font-weight: 300; }
+		tr:nth-child(even) { background-color: #eee; }
+		.bar { position: fixed; left: 0; top: 0; padding: 10px 15px; background: #fff; width: 100%; }
+			.search { display: inline-block; margin-right: 20px; }
+		.message { padding: 10px 0; color: #fe4949; }
+		.queue { position: fixed; left: 0; top: 0; background: #fff; display: none; overflow-y: scroll; }
+	</style>
+
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 </head>
-<body style="padding: 30px 10px 10px 10px;">
-	<div style="position: fixed; left: 0; top: 0; padding: 10px 15px; background: #fff; width: 100%;">
-		<form method="get" style="margin: 0; padding: 0;">
-			<input name="search" type="text" value="{{.Search}}" autofocus="autofocus" />
-			<input type="submit" value="Search" />
-		</form>
+<body>
+	<div class="bar">
+		<div class="search">
+			<form method="get" style="margin: 0; padding: 0;">
+				<input name="search" type="text" value="{{.Search}}" autofocus="autofocus" />
+				<input type="submit" value="Search" />
+			</form>
+		</div>
+
+		<a class="queue-link" href="#">Show Queue</a>
 	</div>
 
-	{{range .Songs}}
-		{{.}}<br />
+	{{if .Songs.Keys}}
+		{{if .Queued}}
+			<div class="message">&quot;{{.Songs.Get .Queued}}&quot; has been queued.</div>
+		{{end}}
+
+		<table>
+			<thead></thead>
+			<tbody>
+				{{$songs := .Songs}}
+				{{range .Songs.Keys}}
+					<tr>
+						<td>{{$songs.Get .}}</td>
+						<td><a href="/queue?id={{.}}">Queue It</a></td>
+					</tr>
+				{{end}}
+			</tbody>
+		</table>
 	{{end}}
+
+	<div class="queue">
+		{{if .Queue}}
+			<table>
+				<thead></thead>
+				<tbody>
+					{{$songs := .Songs}}
+					{{range .Queue}}
+						<tr>
+							<td>{{$songs.Get .}}</td>
+							<td><a href="/unqueue?id={{.}}">Remove It</a></td>
+						</tr>
+					{{end}}
+				</tbody>
+			</table>
+		{{end}}
+	</div>
+
+	<script>
+		(function() {
+			var $bar;
+			var $queueLink;
+			var $queue;
+
+			$(function() {
+				$bar = $('.bar');
+				$queueLink = $('.queue-link');
+				$queue = $('.queue');
+				$queue.offset({
+					left: 0,
+					top: $bar.outerHeight()
+				});
+				$queueLink.click(showQueue);
+			});
+
+			function showQueue(e) {
+				e.preventDefault();
+				$queue.show();
+				$queueLink.text('Hide Queue');
+				$queueLink.off('click').click(hideQueue);
+			}
+
+			function hideQueue(e) {
+				e.preventDefault();
+				$queue.hide();
+				$queueLink.text('Show Queue');
+				$queueLink.off('click').click(showQueue);
+			}
+		})();
+	</script>
 </body>
 </html>
 {{end}}
